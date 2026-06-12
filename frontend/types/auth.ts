@@ -1,0 +1,21 @@
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+  gmail: {
+    messages: number;
+    threads: number;
+  };
+}
+
+export interface CurrentUserResponse {
+  id: number;
+  email: string;
+  name: string;
+}
