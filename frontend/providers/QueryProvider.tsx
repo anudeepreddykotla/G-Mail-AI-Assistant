@@ -5,7 +5,10 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 
-import { ReactNode, useState } from "react";
+import {
+  ReactNode,
+  useState,
+} from "react";
 
 interface Props {
   children: ReactNode;
@@ -22,7 +25,14 @@ export default function QueryProvider({
             queries: {
               staleTime:
                 1000 * 60 * 5,
+
+              gcTime:
+                1000 * 60 * 15,
+
               refetchOnWindowFocus:
+                false,
+
+              refetchOnReconnect:
                 false,
             },
           },

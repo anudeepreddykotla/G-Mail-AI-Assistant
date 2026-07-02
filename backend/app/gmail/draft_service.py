@@ -10,13 +10,14 @@ from app.gmail.email_parser import (
     extract_text
 )
 
-def create_draft(
-    gmail,
+
+def build_draft_message(
     to: str,
     subject: str,
-    body: str
+    body: str,
+    in_reply_to: str | None = None,
+    references: str | None = None
 ):
-
     message = MIMEText(
         body,
         "plain",
@@ -26,11 +27,35 @@ def create_draft(
     message["To"] = to
     message["Subject"] = subject
 
-    raw_message = (
+    if in_reply_to:
+        message["In-Reply-To"] = in_reply_to
+
+    if references:
+        message["References"] = references
+
+    return (
         base64.urlsafe_b64encode(
             message.as_bytes()
         )
         .decode()
+    )
+
+
+def create_draft(
+    gmail,
+    to: str,
+    subject: str,
+    body: str,
+    thread_id: str | None = None,
+    in_reply_to: str | None = None,
+    references: str | None = None
+):
+    raw_message = build_draft_message(
+        to,
+        subject,
+        body,
+        in_reply_to,
+        references
     )
 
     draft = (
@@ -40,7 +65,14 @@ def create_draft(
             userId="me",
             body={
                 "message": {
-                    "raw": raw_message
+                    "raw": raw_message,
+                    **(
+                        {
+                            "threadId": thread_id
+                        }
+                        if thread_id
+                        else {}
+                    )
                 }
             }
         )
@@ -52,11 +84,11 @@ def create_draft(
         "messageId": draft["message"]["id"]
     }
 
+
 def list_drafts(
     gmail,
     max_results: int = 20
 ):
-
     response = (
         gmail.users()
         .drafts()
@@ -75,7 +107,6 @@ def list_drafts(
     result = []
 
     for draft in drafts:
-
         draft_data = (
             gmail.users()
             .drafts()
@@ -86,9 +117,7 @@ def list_drafts(
             .execute()
         )
 
-        message = draft_data[
-            "message"
-        ]
+        message = draft_data["message"]
 
         payload = message.get(
             "payload",
@@ -127,11 +156,11 @@ def list_drafts(
 
     return result
 
+
 def get_draft(
     gmail,
     draft_id: str
 ):
-
     draft = (
         gmail.users()
         .drafts()
@@ -142,9 +171,7 @@ def get_draft(
         .execute()
     )
 
-    message = draft[
-        "message"
-    ]
+    message = draft["message"]
 
     payload = message.get(
         "payload",
@@ -179,11 +206,81 @@ def get_draft(
         )
     }
 
+
+def update_draft(
+    gmail,
+    draft_id: str,
+    to: str,
+    subject: str,
+    body: str,
+    thread_id: str | None = None,
+    in_reply_to: str | None = None,
+    references: str | None = None
+):
+    raw_message = build_draft_message(
+        to,
+        subject,
+        body,
+        in_reply_to,
+        references
+    )
+
+    draft = (
+        gmail.users()
+        .drafts()
+        .update(
+            userId="me",
+            id=draft_id,
+            body={
+                "id": draft_id,
+                "message": {
+                    "raw": raw_message,
+                    **(
+                        {
+                            "threadId": thread_id
+                        }
+                        if thread_id
+                        else {}
+                    )
+                }
+            }
+        )
+        .execute()
+    )
+
+    return {
+        "id": draft["id"],
+        "messageId": draft["message"]["id"]
+    }
+
+
+def send_draft(
+    gmail,
+    draft_id: str
+):
+    sent = (
+        gmail.users()
+        .drafts()
+        .send(
+            userId="me",
+            body={
+                "id": draft_id
+            }
+        )
+        .execute()
+    )
+
+    return {
+        "id": sent["id"],
+        "threadId": sent["threadId"],
+        "status": "sent"
+    }
+
+
 def delete_draft(
     gmail,
     draft_id: str
 ):
-
     (
         gmail.users()
         .drafts()

@@ -48,3 +48,30 @@ export interface GmailDraftsResponse {
 
   drafts: GmailDraft[];
 }
+
+
+// AI TYPES
+
+export interface EmailSummaryResponse {
+  message_id: string;
+
+  summary: string;
+}
+
+export interface SmartReplyResponse {
+  message_id: string;
+
+  replies: string[];
+}
+
+export interface ActionExtractionResponse {
+  message_id: string;
+
+  actions: string[];
+}
+
+export interface PriorityResponse {
+  message_id: string;
+
+  priority: string;
+}

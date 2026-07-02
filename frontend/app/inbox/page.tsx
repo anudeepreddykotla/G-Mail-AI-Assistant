@@ -46,18 +46,25 @@ export default function InboxPage() {
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["inbox"],
-    initialPageParam: null as string | null,
+    initialPageParam:
+      null as string | null,
+
     queryFn: ({ pageParam }) =>
       getMessages({
         maxResults: 20,
         pageToken:
           pageParam || undefined,
       }),
+
     getNextPageParam: (
       lastPage
     ) =>
       lastPage?.nextPageToken ??
       undefined,
+
+    placeholderData:
+      (previousData) =>
+        previousData,
   });
 
   const messages =
@@ -93,8 +100,6 @@ export default function InboxPage() {
                   null
                 );
 
-                await refetch();
-
                 return;
               }
 
@@ -114,7 +119,7 @@ export default function InboxPage() {
           },
           400
         ),
-      [refetch]
+      []
     );
 
   const loadMore =

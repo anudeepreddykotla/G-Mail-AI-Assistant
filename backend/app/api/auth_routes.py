@@ -2,6 +2,9 @@ from fastapi import APIRouter
 from fastapi import Request
 from fastapi import Depends
 
+from google.oauth2 import id_token
+from google.auth.transport import requests
+
 from fastapi.responses import RedirectResponse
 
 from sqlalchemy.orm import Session
@@ -68,7 +71,8 @@ def login(
     authorization_url, state = (
         flow.authorization_url(
             access_type="offline",
-            include_granted_scopes="true"
+            include_granted_scopes="true",
+            prompt="consent"
         )
     )
 
@@ -116,19 +120,12 @@ async def callback(
 
     credentials = flow.credentials
 
-    gmail = get_gmail_service(
-        credentials
+    id_info = id_token.verify_oauth2_token(
+        credentials.id_token,
+        requests.Request()
     )
 
-    profile = (
-        gmail.users()
-        .getProfile(
-            userId="me"
-        )
-        .execute()
-    )
-
-    email = profile["emailAddress"]
+    email = id_info["email"]
 
     user = get_user_by_email(
         db,

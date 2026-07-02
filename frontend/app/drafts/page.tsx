@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import AppShell from "@/components/layout/AppShell";
 import ComposeModal from "@/components/email/ComposeModal";
@@ -31,6 +34,8 @@ export default function DraftsPage() {
 
   const loadDrafts = async () => {
     try {
+      setLoading(true);
+
       const response =
         await getDrafts();
 
@@ -68,9 +73,19 @@ export default function DraftsPage() {
     draft: GmailDraft
   ) => {
     setSelectedDraft(draft);
-
     setComposeOpen(true);
   };
+
+  const handleCloseCompose =
+    () => {
+      setComposeOpen(false);
+
+      setSelectedDraft(
+        null
+      );
+
+      loadDrafts();
+    };
 
   useEffect(() => {
     loadDrafts();
@@ -134,11 +149,7 @@ export default function DraftsPage() {
                     "
                   >
                     <div className="flex-1">
-                      <div
-                        className="
-                          font-medium
-                        "
-                      >
+                      <div className="font-medium">
                         {draft.subject ||
                           "(No Subject)"}
                       </div>
@@ -190,17 +201,18 @@ export default function DraftsPage() {
           )}
         </div>
       </div>
-
       <ComposeModal
         open={composeOpen}
-        onClose={() => {
-          setComposeOpen(false);
-
-          setSelectedDraft(
-            null
-          );
-        }}
+        onClose={
+          handleCloseCompose
+        }
         title="Edit Draft"
+        draftId={
+          selectedDraft?.id
+        }
+        threadId={
+          selectedDraft?.threadId
+        }
         initialTo={
           selectedDraft?.to
         }

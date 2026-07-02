@@ -5,19 +5,23 @@ import {
   useState,
 } from "react";
 
-import { sendEmail } from "@/services/gmail";
+import {
+  sendEmail,
+  createDraft,
+  updateDraft,
+  sendDraft,
+} from "@/services/gmail";
 
 interface Props {
   open: boolean;
-
   onClose: () => void;
 
   initialTo?: string;
-
   initialSubject?: string;
-
   initialBody?: string;
 
+  draftId?: string;
+  threadId?: string;
   title?: string;
 }
 
@@ -27,6 +31,8 @@ export default function ComposeModal({
   initialTo = "",
   initialSubject = "",
   initialBody = "",
+  draftId,
+  threadId,
   title = "New Message",
 }: Props) {
   const [to, setTo] =
@@ -41,10 +47,15 @@ export default function ComposeModal({
   const [sending, setSending] =
     useState(false);
 
+  const [saving, setSaving] =
+    useState(false);
+
   useEffect(() => {
     if (open) {
       setTo(initialTo);
-      setSubject(initialSubject);
+      setSubject(
+        initialSubject
+      );
       setBody(initialBody);
     }
   }, [
@@ -56,21 +67,70 @@ export default function ComposeModal({
 
   if (!open) return null;
 
+  const resetForm = () => {
+    setTo("");
+    setSubject("");
+    setBody("");
+  };
+
+  const handleSaveDraft =
+    async () => {
+      try {
+        setSaving(true);
+
+        if (draftId) {
+          await updateDraft(
+            draftId,
+            to,
+            subject,
+            body,
+            threadId
+          );
+        } else {
+          await createDraft(
+            to,
+            subject,
+            body,
+            threadId
+          );
+        }
+
+        resetForm();
+        onClose();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setSaving(false);
+      }
+    };
+
   const handleSend =
     async () => {
       try {
         setSending(true);
 
-        await sendEmail(
-          to,
-          subject,
-          body
-        );
+        if (draftId) {
+          await updateDraft(
+            draftId,
+            to,
+            subject,
+            body,
+            threadId
+          );
 
-        setTo("");
-        setSubject("");
-        setBody("");
+          await sendDraft(
+            draftId
+          );
+        } else {
+          await sendEmail(
+            to,
+            subject,
+            body,
+            threadId
+          );
+        }
 
+        resetForm();
         onClose();
       } catch (error) {
         console.error(error);
@@ -162,7 +222,29 @@ export default function ComposeModal({
 
         <div className="flex justify-end gap-2">
           <button
+            onClick={
+              handleSaveDraft
+            }
+            disabled={
+              saving || sending
+            }
+            className="
+              rounded
+              px-4
+              py-2
+              hover:bg-zinc-900
+            "
+          >
+            {saving
+              ? "Saving..."
+              : "Save Draft"}
+          </button>
+
+          <button
             onClick={onClose}
+            disabled={
+              saving || sending
+            }
             className="
               rounded
               px-4
@@ -175,7 +257,9 @@ export default function ComposeModal({
 
           <button
             onClick={handleSend}
-            disabled={sending}
+            disabled={
+              sending || saving
+            }
             className="
               rounded
               bg-blue-600

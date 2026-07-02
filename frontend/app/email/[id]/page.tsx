@@ -8,7 +8,10 @@ import AppShell from "@/components/layout/AppShell";
 
 import EmailActions from "@/components/email/EmailActions";
 
-import { getMessage } from "@/services/gmail";
+import {
+  getMessage,
+  getThread,
+} from "@/services/gmail";
 
 function getSender(from: string) {
   const match =
@@ -52,6 +55,25 @@ export default function EmailPage() {
     staleTime: 1000 * 60 * 5,
   });
 
+  const {
+    data: thread,
+  } = useQuery({
+    queryKey: [
+      "thread",
+      message?.threadId,
+    ],
+    queryFn: () =>
+      getThread(
+        message!.threadId
+      ),
+    enabled:
+      !!message?.threadId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const threadCount =
+    thread?.messages?.length || 1;
+
   return (
     <AppShell>
       <div className="h-full overflow-y-auto">
@@ -79,6 +101,9 @@ export default function EmailPage() {
             >
               <EmailActions
                 message={message}
+                threadCount={
+                  threadCount
+                }
                 onRefresh={
                   async () => {
                     await refetch();

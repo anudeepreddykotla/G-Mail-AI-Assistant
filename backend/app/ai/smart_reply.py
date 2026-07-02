@@ -10,14 +10,16 @@ class SmartReplyGenerator:
 
     def generate(
         self,
-        email_body: str
+        content: str,
+        sender_context: str
     ) -> SmartReplyOptions:
-        cleaned_email_body = clean_email_body(
-            email_body
+        cleaned_content = clean_email_body(
+            content
         )
 
         prompt = SMART_REPLY_PROMPT.format(
-            email_body=cleaned_email_body
+            email_body=cleaned_content,
+            sender=sender_context
         )
 
         response = ai_client.generate(

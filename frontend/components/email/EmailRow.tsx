@@ -3,6 +3,7 @@
 import {
   memo,
   useCallback,
+  useRef,
 } from "react";
 
 import { useRouter } from "next/navigation";
@@ -19,9 +20,7 @@ import { GmailMessage } from "@/types/gmail";
 
 interface Props {
   message: GmailMessage;
-
   selected: boolean;
-
   onToggleSelect: (
     id: string
   ) => void;
@@ -31,9 +30,7 @@ function getSender(from: string) {
   const match =
     from.match(/^(.+?)\s*</);
 
-  if (match) {
-    return match[1];
-  }
+  if (match) return match[1];
 
   return from
     .replace(/<.*>/, "")
@@ -127,9 +124,11 @@ function EmailRow({
   onToggleSelect,
 }: Props) {
   const router = useRouter();
-
   const queryClient =
     useQueryClient();
+
+  const hasPrefetched =
+    useRef(false);
 
   const unread =
     message.labelIds?.includes(
@@ -176,6 +175,14 @@ function EmailRow({
   const prefetchEmail =
     useCallback(
       async () => {
+        if (
+          hasPrefetched.current
+        )
+          return;
+
+        hasPrefetched.current =
+          true;
+
         router.prefetch(
           `/email/${message.id}`
         );
@@ -190,6 +197,8 @@ function EmailRow({
               getMessage(
                 message.id
               ),
+            staleTime:
+              1000 * 60 * 5,
           }
         );
       },
@@ -332,14 +341,18 @@ export default memo(
       nextProps.selected &&
     prevProps.message.id ===
       nextProps.message.id &&
+    prevProps.message.subject ===
+      nextProps.message.subject &&
+    prevProps.message.snippet ===
+      nextProps.message.snippet &&
+    prevProps.message.from ===
+      nextProps.message.from &&
+    prevProps.message.date ===
+      nextProps.message.date &&
     prevProps.message.labelIds?.join(
       ","
     ) ===
       nextProps.message.labelIds?.join(
         ","
-      ) &&
-    prevProps.message.subject ===
-      nextProps.message.subject &&
-    prevProps.message.snippet ===
-      nextProps.message.snippet
+      )
 );

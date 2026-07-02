@@ -17,13 +17,11 @@ def save_tokens(
     expires_at
 ):
 
-    encrypted_refresh_token = None
-
-    if refresh_token:
-
-        encrypted_refresh_token = encrypt(
-            refresh_token
-        )
+    encrypted_refresh_token = (
+        encrypt(refresh_token)
+        if refresh_token
+        else None
+    )
 
     existing = (
         db.query(OAuthToken)
@@ -58,6 +56,11 @@ def save_tokens(
         if user is None:
             raise Exception(
                 f"User not found: {email}"
+            )
+        
+        if encrypted_refresh_token is None:
+            raise Exception(
+                "Refresh token missing. Re-authentication required."
             )
 
         token = OAuthToken(

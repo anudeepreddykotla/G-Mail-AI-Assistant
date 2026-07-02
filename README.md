@@ -1,6 +1,6 @@
 # Gmail AI Assistant
 
-A full-stack Gmail client with built-in AI features for summarization, smart replies, action extraction, and priority classification.
+A full-stack Gmail client with built-in AI features for summarization, smart replies, action extraction, intent detection, reminders, and intelligent email organization.
 
 This project combines Gmail operations with AI-powered productivity features in a clean, scalable, and modular architecture.
 
@@ -69,21 +69,23 @@ This project combines Gmail operations with AI-powered productivity features in 
 
 ## Drafts
 
-- Create draft
-- Fetch drafts
+- Create drafts
 - Edit drafts
 - Delete drafts
+- Send drafts
 
 ## Threads
 
 - Fetch email threads
-- View complete thread conversations
+- View full threaded conversations
+- Thread-aware replies
+- Thread-aware AI summaries
 
 ## Labels
 
 - List labels
 - Create labels
-- Add labels to emails
+- Apply labels to emails
 - Remove labels from emails
 
 ---
@@ -92,28 +94,48 @@ This project combines Gmail operations with AI-powered productivity features in 
 
 ## Email Summarization
 
-Generate structured summaries for emails:
+Generate structured summaries for individual emails:
 
 - Short summary
 - Key bullet points
 - Action items
 
+---
+
+## Thread Summarization
+
+Generate summaries for complete email conversations to preserve context.
+
+Useful for:
+- Long discussions
+- Team updates
+- Ongoing project threads
+
+---
+
 ## Smart Reply
 
-Generate three reply options:
+Generate context-aware reply suggestions:
 
 - Formal
 - Casual
 - Concise
 
+Supports:
+- Single email replies
+- Thread-aware replies
+
+---
+
 ## Action Extraction
 
-Extract actionable tasks from emails with deadlines.
+Extract actionable tasks from emails:
 
 Example:
-
 - Submit assignment before Friday
-- Attend meeting at 5 PM
+- Attend sync at 5 PM
+
+---
 
 ## Priority Classification
 
@@ -124,12 +146,59 @@ Classify emails into:
 - Low
 
 Examples:
-
 - Job invitations
 - Contest invitations
 - Hackathons
-- Interviews
+- Interview mails
 - Deadlines
+
+---
+
+## Intent Detection
+
+Detect semantic intent of emails.
+
+Examples:
+
+- Job Opportunity
+- Internship
+- Interview
+- Hackathon
+- Contest
+- Meeting
+- Project Update
+- Academic
+- Payment Due
+- Invoice
+- Promotion
+- Newsletter
+
+---
+
+## AI Label Suggestions
+
+Generate smart labels based on email intent.
+
+Examples:
+
+- Work
+- Project
+- Career
+- Finance
+- Academic
+- Promotions
+
+---
+
+## Reminder Extraction
+
+Extract reminder-worthy tasks with deadlines and urgency.
+
+Example:
+
+- Register for hackathon
+- Submit application
+- Attend project sync
 
 ---
 
@@ -144,17 +213,25 @@ Used for:
 - Better loading states
 - Reduced duplicate requests
 
+---
+
 ## Infinite Pagination
 
 Implemented token-based pagination for scalable email loading.
+
+---
 
 ## Debounced Search
 
 Used `lodash/debounce` to optimize search and reduce API calls.
 
+---
+
 ## Virtualized Rendering
 
 Used `react-window` to render only visible email rows for better performance.
+
+---
 
 ## Memoization
 
@@ -166,9 +243,26 @@ Used:
 
 To reduce unnecessary rerenders.
 
+---
+
 ## Route Prefetching
 
 Prefetches routes and email content for faster navigation.
+
+---
+
+## AI Frontend Integration
+
+Integrated AI actions directly into the email view:
+
+- Summarize email
+- Summarize thread
+- Generate smart replies
+- Extract tasks
+- Detect priority
+- Detect intent
+- Suggest labels
+- Extract reminders
 
 ---
 
@@ -188,6 +282,8 @@ backend/app
 └── security
 ```
 
+---
+
 ## Service Layer
 
 Separated Gmail logic into:
@@ -200,6 +296,8 @@ Separated Gmail logic into:
 - `search_service`
 - `message_actions`
 
+---
+
 ## Dependency Injection
 
 Reusable dependencies:
@@ -208,6 +306,8 @@ Reusable dependencies:
 - `get_current_gmail()`
 
 This reduces duplicated authentication logic.
+
+---
 
 ## Security
 
@@ -229,10 +329,15 @@ backend/app/ai
 ├── smart_reply.py
 ├── extractor.py
 ├── classifier.py
+├── intent_detector.py
+├── label_suggester.py
+├── reminder_extractor.py
 ├── resolver.py
 ├── cache_service.py
 └── utils.py
 ```
+
+---
 
 ## AI Pipeline
 
@@ -254,6 +359,8 @@ Schema Validation
 Structured Response
 ```
 
+---
+
 ## AI Optimizations
 
 - Reusable Gemini client
@@ -261,7 +368,9 @@ Structured Response
 - Typed schemas
 - Summary caching
 - Email preprocessing
+- Deterministic label generation
 - Modular AI services
+- Thread-aware context handling
 
 ---
 
@@ -287,6 +396,8 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
+---
+
 ## Frontend
 
 ```bash
@@ -308,17 +419,6 @@ GOOGLE_CLIENT_SECRET=
 ENCRYPTION_KEY=
 GEMINI_API_KEY=
 ```
-
----
-
-## Future Improvements
-
-- AI-powered email categorization
-- Calendar event extraction
-- Meeting summarization
-- Attachment summarization
-- Spam detection with AI
-- Voice-based email actions
 
 ---
 

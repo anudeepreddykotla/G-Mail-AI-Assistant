@@ -41,3 +41,34 @@ class PriorityResult(BaseModel):
 class PriorityResponse(BaseModel):
     message_id: str
     priority: PriorityResult
+
+class IntentResult(BaseModel):
+    category: str
+    reason: str
+
+
+class IntentResponse(BaseModel):
+    message_id: str
+    intent: IntentResult
+
+class LabelSuggestionResult(BaseModel):
+    labels: list[str]
+
+
+class LabelSuggestionResponse(BaseModel):
+    message_id: str
+    suggestions: LabelSuggestionResult
+
+class ReminderItem(BaseModel):
+    title: str
+    datetime: str | None = None
+    priority: str
+
+
+class ReminderExtractionResult(BaseModel):
+    reminders: list[ReminderItem]
+
+
+class ReminderResponse(BaseModel):
+    message_id: str
+    reminders: ReminderExtractionResult

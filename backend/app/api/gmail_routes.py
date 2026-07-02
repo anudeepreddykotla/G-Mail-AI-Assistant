@@ -45,6 +45,8 @@ from app.gmail.draft_service import (
     create_draft,
     list_drafts,
     get_draft,
+    update_draft,
+    send_draft,
     delete_draft
 )
 
@@ -301,7 +303,10 @@ def create_email_draft(
         gmail,
         request.to,
         request.subject,
-        request.body
+        request.body,
+        request.thread_id,
+        request.in_reply_to,
+        request.references
     )
 
 
@@ -324,6 +329,32 @@ def gmail_draft(
 ):
     return get_draft(gmail, draft_id)
 
+@router.put("/drafts/{draft_id}")
+def edit_draft(
+    draft_id: str,
+    request: SendEmailRequest,
+    gmail=Depends(get_current_gmail)
+):
+    return update_draft(
+        gmail,
+        draft_id,
+        request.to,
+        request.subject,
+        request.body,
+        request.thread_id,
+        request.in_reply_to,
+        request.references
+    )
+
+@router.post("/drafts/{draft_id}/send")
+def send_email_draft(
+    draft_id: str,
+    gmail=Depends(get_current_gmail)
+):
+    return send_draft(
+        gmail,
+        draft_id
+    )
 
 @router.delete("/drafts/{draft_id}")
 def remove_draft(
