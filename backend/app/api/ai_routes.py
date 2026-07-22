@@ -4,7 +4,11 @@ from sqlalchemy.orm import Session
 
 from app.auth.current_gmail import get_current_gmail
 
+from app.ai.search_pipeline import semantic_search
+
 from app.db.session import get_db
+
+from app.ai.bulk_index_pipeline import bulk_index
 
 from app.gmail.message_service import (
     get_message_by_id
@@ -22,6 +26,8 @@ from app.ai.reminder_extractor import (
     ReminderExtractor
 )
 
+from app.ai.embedding_pipeline import generate_and_store_embedding
+
 from app.ai.resolver import AIContentResolver
 from app.ai.summarizer import EmailSummarizer
 from app.ai.smart_reply import SmartReplyGenerator
@@ -36,7 +42,12 @@ from app.ai.schemas import (
     PriorityResponse,
     IntentResponse,
     LabelSuggestionResponse,
-    ReminderResponse
+    ReminderResponse,
+    EmbeddingResponse, 
+    SemanticSearchRequest,
+    SemanticSearchResponse,
+    BulkIndexRequest,
+    BulkIndexResponse,
 )
 
 from app.gmail.thread_service import (
@@ -387,4 +398,50 @@ def extract_reminders(
     return ReminderResponse(
         message_id=message_id,
         reminders=reminders
+    )
+
+@router.post(
+    "/messages/{message_id}/embed",
+    response_model=EmbeddingResponse,
+)
+def embed_message(
+    message_id: str,
+    gmail=Depends(get_current_gmail),
+    db: Session = Depends(get_db),
+):
+    return generate_and_store_embedding(
+        db=db,
+        gmail=gmail,
+        message_id=message_id,
+    )
+
+@router.post(
+    "/search",
+    response_model=SemanticSearchResponse,
+)
+def search(
+    request: SemanticSearchRequest,
+    gmail=Depends(get_current_gmail),
+    db: Session = Depends(get_db),
+):
+    return semantic_search(
+        db=db,
+        gmail=gmail,
+        query=request.query,
+        limit=request.limit,
+    )
+
+@router.post(
+    "/index",
+    response_model=BulkIndexResponse,
+)
+def index_messages(
+    request: BulkIndexRequest,
+    gmail=Depends(get_current_gmail),
+    db: Session = Depends(get_db),
+):
+    return bulk_index(
+        db=db,
+        gmail=gmail,
+        max_messages=request.max_messages,
     )

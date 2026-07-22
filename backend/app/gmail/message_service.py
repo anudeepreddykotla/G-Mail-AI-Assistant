@@ -207,3 +207,19 @@ def get_message_by_id(
             []
         )
     }
+
+def list_message_ids(
+    gmail,
+    max_results: int = 100,
+):
+    response = (
+        gmail.users()
+        .messages()
+        .list(
+            userId="me",
+            maxResults=max_results,
+        )
+        .execute()
+    )
+
+    return response.get("messages", [])

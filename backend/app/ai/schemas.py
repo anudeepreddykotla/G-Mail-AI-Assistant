@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class EmailSummary(BaseModel):
@@ -72,3 +72,36 @@ class ReminderExtractionResult(BaseModel):
 class ReminderResponse(BaseModel):
     message_id: str
     reminders: ReminderExtractionResult
+
+class EmbeddingResponse(BaseModel):
+    success: bool
+    message_id: str
+    dimensions: int
+
+
+class SemanticSearchRequest(BaseModel):
+    query: str
+    limit: int = Field(default=5, ge=1, le=20)
+
+
+class SemanticSearchResult(BaseModel):
+    message_id: str
+    score: float
+    subject: str
+    sender: str
+    snippet: str
+
+
+class SemanticSearchResponse(BaseModel):
+    results: list[SemanticSearchResult]
+
+
+class BulkIndexRequest(BaseModel):
+    max_messages: int = Field(default=100, ge=1, le=500)
+
+
+class BulkIndexResponse(BaseModel):
+    processed: int
+    indexed: int
+    skipped: int
+    failed: int
